@@ -80,4 +80,48 @@ class StudentsController < ApplicationController
       format.json { head :no_content }
     end
   end
+
+  # GET /students/1/courses
+  def courses
+    @student = Student.find(params[:id])
+    @courses = @student.courses
+  end
+
+  # POST /students/1/course_add?course_id=2
+  # (note no real query string, just
+  # convenient notation for parameters)
+
+  def course_add
+#Convert ids from routing to objects
+    @student = Student.find(params[:id])
+    @course = Course.find(params[:course])
+      if not @student.enrolled_in?(@course)
+#add course to list using << operator
+        @student.courses << @course
+        flash[:notice] = 'Student was successfully enrolled'
+      else
+        flash[:error] = 'Student was already enrolled'
+      end
+
+    redirect_to :action => :courses, :id => @student
+  end
+
+  # POST /students/1/course_remove?courses[]=
+  def course_remove
+#Convert ids from routing to object
+    @student = Student.find(params[:id])
+#get list of courses to remove from query string
+    course_ids = params[:courses]
+      unless course_ids.blank?
+        course_ids.each do |course_id|
+        course = Course.find(course_id)
+      if @student.enrolled_in?(course)
+        logger.info "Removing student from course #{course.id}"
+        @student.courses.delete(course)
+        flash[:notice] = 'Course was successfully deleted'
+        end
+      end
+    end
+  redirect_to :action => :courses, :id => @student
+  end
 end

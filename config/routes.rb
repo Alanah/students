@@ -1,8 +1,12 @@
 Students::Application.routes.draw do
-  resources :awards
+ 
+
+  resources :courses
 
 
-  resources :students
+  resources :students do
+    resources :awards
+  end
 
 
   # The priority is based upon order of creation:
